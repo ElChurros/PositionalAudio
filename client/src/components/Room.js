@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useContext } from 'react';
 import io from "socket.io-client";
 import Peer from "simple-peer";
 import AudioTrack from './AudioTrack'
+import AudioContext from '../contexts/audioCtx'
 
 const Room = ({ match }) => {
 
@@ -15,7 +16,10 @@ const Room = ({ match }) => {
 
     const [joined, setJoined] = useState(false);
 
+    const audioCtx = useContext(AudioContext);
+
     const joinRoom = () => {
+        audioCtx.resume();
         socketRef.current = io.connect('localhost:8000/');
         navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then((stream) => {
     

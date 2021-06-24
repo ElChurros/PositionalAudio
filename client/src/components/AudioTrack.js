@@ -9,6 +9,7 @@ const AudioTrack = ({peer}) => {
 
     useEffect(() => {
         peer.on("stream", stream => {
+            console.log(audioCtx.state)
             const source = audioCtx.createMediaStreamSource(stream);
             source.connect(audioCtx.destination);
             audioRef.current.srcObject = stream;
