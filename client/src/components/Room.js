@@ -13,10 +13,12 @@ const Room = ({ match }) => {
 
     const [players, setPlayers] = useState([]);
 
-    useEffect(() => {
+    const [joined, setJoined] = useState(false);
+
+    const joinRoom = () => {
         socketRef.current = io.connect('localhost:8000/');
         navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then((stream) => {
-
+    
             socketRef.current.on("all users", payload => {
                 payload.forEach(userId => {
                     if (userId !== socketRef.current.id) {
@@ -26,16 +28,17 @@ const Room = ({ match }) => {
                 })
                 setPlayers(payload)
             })
-
+    
             socketRef.current.on("user joined", payload => {
                 const peer = addPeer(payload.signal, payload.callerID, stream);
                 peers.current.push({ id: payload.callerID, peer: peer })
                 setPlayers((prev) => [...prev, payload.callerID])
             })
-
+    
             socketRef.current.emit("join room", roomId);
+            setJoined(true)
         })
-    }, [roomId])
+    }
 
     function createPeer(userToSignal, callerID, stream) {
         const peer = new Peer({
@@ -82,6 +85,10 @@ const Room = ({ match }) => {
         {players.filter(player => player !== socketRef.current.id).map(player => {
             return <AudioTrack key={player} peer={peers.current.find(peer => peer.id === player).peer}></AudioTrack>
         })}
+        {!joined
+            ? <button onClick={joinRoom}>Join Room</button>
+            : null
+        }
     </>
 }
 
